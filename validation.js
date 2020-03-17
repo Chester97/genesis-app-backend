@@ -28,10 +28,21 @@ const postsValidation = (data) => {
     const postsSchema = Joi.object({
         title: Joi.string().required().min(10).max(50),
         description: Joi.string().required().min(20).max(1000),
+        authorName: Joi.string().required().min(3).max(50),
     });
     return postsSchema.validate(data);
+}
+
+//COMMENTS VALIDATION
+const commentsValidation = (data) => {
+    const commentsSchema = Joi.object({
+        text: Joi.string().required().min(1).max(250),
+        postId: Joi.string().required(),
+    });
+    return commentsSchema.validate(data);
 }
 
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
 module.exports.postsValidation = postsValidation;
+module.exports.commentsValidation = commentsValidation;

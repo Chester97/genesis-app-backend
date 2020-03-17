@@ -1,10 +1,11 @@
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const Posts = require("../../model/Posts");
+const Comments = require("../../model/Comments");
 const User = require("../../model/User");
 const io = require("../../index");
-const { postsValidation } = require("../../validation");
-const { onPostAdded } = require('../../services/posts');
+const { postsValidation, commentsValidation } = require("../../validation");
+const { onPostAdded, onCommentAdded } = require('../../services/posts');
 
 router.post("/addPost", async (req,res) => {
 
@@ -51,6 +52,26 @@ router.post("/addPost", async (req,res) => {
     });
 });
 
+router.post('/addComment', async (req,res) => {
+    const { error } = commentsValidation(req.body);
+    if(error) {
+        const errorMsg = error.details[0];
+        return res.status(400).send(errorMsg);
+    }
+    const comment = new Comments({
+        ...req.body
+    });
+
+    try {
+        await comment.save();
+        onCommentAdded(comment);
+        console.log("dodaje")
+        res.status(200).send(comment);
+    }catch(error) {
+        res.status(409).send(error);
+    }
+});
+
 router.get('/getPosts', async (req,res) => {
 
     //Get AccessToken and convert it
@@ -63,6 +84,26 @@ router.get('/getPosts', async (req,res) => {
     jwt.verify(currentAccessToken, process.env.TOKEN_SECRET, async (err, decoded) => {
         if(err) return res.status(404).send({ message: err });
         await Posts.find((error, data) => {
+            if(data.length > 0) {
+                return res.status(200).send(data);
+            }
+            return res.status(400).send({ message: "There is no post in DB" });
+        });
+    })
+});
+
+router.get('/getComments', async (req,res) => {
+
+    //Get AccessToken and convert it
+    let currentAccessToken = null;
+    if(req.headers.authorization) {
+        currentAccessToken = req.headers.authorization.split(" ")[1];
+    };
+
+    //verifyToken
+    jwt.verify(currentAccessToken, process.env.TOKEN_SECRET, async (err, decoded) => {
+        if(err) return res.status(404).send({ message: err });
+        await Comments.find((error, data) => {
             if(data.length > 0) {
                 return res.status(200).send(data);
             }

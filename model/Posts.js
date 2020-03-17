@@ -17,6 +17,11 @@ const postsSchema = new mongoose.Schema({
     required: true,
     min: 20,
     max: 1000
+  },
+  authorName: {
+    type: mongoose.Schema.Types.String,
+    ref: "User",
+    required: true,
   }
 });
 

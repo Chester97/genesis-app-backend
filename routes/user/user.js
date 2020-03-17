@@ -23,13 +23,14 @@ router.post("/register", async (req,res) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
-    //Create new user
+    //Create new user  (Check that is it work or not)!
+    const { name,surname,login,email } = req.body; 
     const user = new User({
-        name: req.body.name,
-        surname: req.body.surname,
-        login: req.body.login,
+        name,
+        surname,
+        login,
+        email,
         password: hashPassword,
-        email: req.body.email
     });
     
     try {
@@ -65,4 +66,4 @@ router.post("/login", async (req,res) => {
 
 });
 
-module.exports = router;
+module.exports = router;  
